@@ -1,17 +1,20 @@
 import {
   ReactNode,
   createContext,
+  useCallback,
   useContext,
-  useEffect,
-  useLayoutEffect,
-  useRef,
   useState,
 } from 'react';
+
+// TODO drop react 16 support
+import useSyncExternalStore from './useSyncExternalStore';
 
 type Subscriber<T> = (state: T) => void;
 type Updater<T> = (prevState: T) => T;
 
 type State = Record<string, unknown>;
+
+type SelectorFunction<T> = (state: T) => unknown;
 
 class Store<T extends State> {
   #state: T;
@@ -39,7 +42,7 @@ class Store<T extends State> {
   subscribe = (sub: Subscriber<T>) => {
     this.#subscribers.push(sub);
     return () => {
-      this.#subscribers = this.#subscribers.filter(sub => sub === sub);
+      this.#subscribers = this.#subscribers.filter(entry => entry !== sub);
     };
   };
 
@@ -48,16 +51,6 @@ class Store<T extends State> {
       subscriber(this.getState());
     });
   };
-}
-
-function useFnRef<T>(fn: T) {
-  const ref = useRef(fn);
-
-  useLayoutEffect(() => {
-    ref.current = fn;
-  }, [fn]);
-
-  return ref;
 }
 
 function defaultSelector<T>(state: T) {
@@ -85,15 +78,19 @@ function createStoreContext<T extends State>() {
     return useContext(StoreContext);
   }
 
-  function useSlice(selector: (state: T) => unknown = defaultSelector) {
+  function useSlice(
+    selector: SelectorFunction<T> | 'string' = defaultSelector
+  ) {
     const store = useStore();
-    const selectorRef = useFnRef(selector);
 
-    const [slice, setSlice] = useState(() => selector(store.getState()));
-
-    useEffect(() => {
-      store.subscribe(storeState => setSlice(selectorRef.current(storeState)));
-    }, [store, selectorRef]);
+    const getSnapshot = useCallback(
+      () =>
+        typeof selector === 'string'
+          ? store.getState()[selector]
+          : selector(store.getState()),
+      [selector, store]
+    );
+    const slice = useSyncExternalStore(store.subscribe, getSnapshot);
 
     return slice;
   }
@@ -103,6 +100,7 @@ function createStoreContext<T extends State>() {
     return store.setState;
   }
 
+  // for getting state only in event handlers
   function useGetState() {
     const store = useStore();
     return store.getState;

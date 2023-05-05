@@ -1,18 +1,30 @@
+import {useState} from 'react';
 import reactLogo from './assets/react.svg';
 import viteLogo from '/vite.svg';
 import {StoreProvider, useSetState, useSlice, useGetState} from './AppContext';
+import Example from './Example';
 
 import './App.css';
-import Example from './Example';
 
 const ChildStr = () => {
   const str = useSlice(state => state.str) as string;
+  const setState = useSetState();
 
   console.log('ChildStr');
   return (
     <div style={{marginBottom: 24}}>
       <h2>ChildStr</h2>
       {str}
+      <button
+        onClick={() => {
+          setState(prev => ({
+            ...prev,
+            str: prev.str + 'k',
+          }));
+        }}
+      >
+        add
+      </button>
     </div>
   );
 };
@@ -95,6 +107,26 @@ const ChildObj = () => {
   );
 };
 
+const Dynamic = () => {
+  const [name, setName] = useState('str');
+  // const selector = useCallback(state => state[name], [name]);
+
+  const slice = useSlice(name);
+
+  console.log('Dynamic');
+  return (
+    <div style={{marginBottom: 24}}>
+      <h2>Dynamic</h2>
+      <div>
+        {name}: {slice}
+      </div>
+      <button onClick={() => setName(prev => (prev === 'str' ? 'num' : 'str'))}>
+        Toggle
+      </button>
+    </div>
+  );
+};
+
 const GetState = () => {
   const getState = useGetState();
   return (
@@ -115,6 +147,7 @@ function App() {
     <StoreProvider initialState={{paths: [], obj: {}, num: 1, str: 'never'}}>
       <ChildStr />
       <ChildNum />
+      <Dynamic />
       <ChildPaths />
       <ChildObj />
       <GetState />
