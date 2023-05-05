@@ -1,4 +1,4 @@
-import {createStoreContext} from './lib/store';
+import {createStoreContext} from './lib';
 
 const Ctx = createStoreContext();
 

@@ -1,7 +1,4 @@
-# Ryze
-
-```jsx
-import {createStoreContext} from 'ryze';
+import {createStoreContext} from './lib';
 
 const {Provider, useSlice, useSetState} = createStoreContext();
 
@@ -30,4 +27,5 @@ const Example = () => {
     </Provider>
   );
 };
-```
+
+export default Example;

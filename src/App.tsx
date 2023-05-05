@@ -3,6 +3,7 @@ import viteLogo from '/vite.svg';
 import {StoreProvider, useSetState, useSlice} from './AppContext';
 
 import './App.css';
+import Example from './Example';
 
 const ChildStr = () => {
   const str = useSlice(state => state.str) as string;
@@ -103,6 +104,7 @@ function App() {
       <ChildNum />
       <ChildPaths />
       <ChildObj />
+      <Example />
       <div>
         <a href="https://vitejs.dev" target="_blank">
           <img src={viteLogo} className="logo" alt="Vite logo" />
