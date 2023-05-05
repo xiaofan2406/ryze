@@ -1,9 +1,9 @@
 # Ryze
 
 ```jsx
-import {createStoreContext} from 'ryze';
+import createStoreContext from 'ryze';
 
-const {Provider, useSlice, useSetState} = createStoreContext();
+const {StoreProvider, useSlice, useSetState} = createStoreContext();
 
 const Child = () => {
   const count = useSlice(state => state.count);
@@ -25,9 +25,9 @@ const Child = () => {
 
 const Example = () => {
   return (
-    <Provider initialState={{count: 10}}>
+    <StoreProvider initialState={{count: 10}}>
       <Child />
-    </Provider>
+    </StoreProvider>
   );
 };
 ```

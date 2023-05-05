@@ -64,10 +64,10 @@ function defaultSelector<T>(state: T) {
   return state;
 }
 
-export function createStoreContext<T extends State>() {
+function createStoreContext<T extends State>() {
   const StoreContext = createContext({} as Store<T>);
 
-  function Provider({
+  function StoreProvider({
     initialState,
     children,
   }: {
@@ -104,10 +104,12 @@ export function createStoreContext<T extends State>() {
   }
 
   return {
-    Provider,
-    Consumer: StoreContext.Consumer,
+    StoreProvider,
+    StoreConsumer: StoreContext.Consumer,
     useStore,
     useSlice,
     useSetState,
   };
 }
+
+export default createStoreContext;
