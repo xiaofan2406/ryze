@@ -1,6 +1,6 @@
 import reactLogo from './assets/react.svg';
 import viteLogo from '/vite.svg';
-import {StoreProvider, useSetState, useSlice} from './AppContext';
+import {StoreProvider, useSetState, useSlice, useGetState} from './AppContext';
 
 import './App.css';
 import Example from './Example';
@@ -95,6 +95,19 @@ const ChildObj = () => {
   );
 };
 
+const GetState = () => {
+  const getState = useGetState();
+  return (
+    <button
+      onClick={() => {
+        console.log(JSON.stringify(getState(), null, 2));
+      }}
+    >
+      log getState
+    </button>
+  );
+};
+
 function App() {
   console.log('App');
 
@@ -104,6 +117,7 @@ function App() {
       <ChildNum />
       <ChildPaths />
       <ChildObj />
+      <GetState />
       <Example />
       <div>
         <a href="https://vitejs.dev" target="_blank">

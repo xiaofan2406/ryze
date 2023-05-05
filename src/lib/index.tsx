@@ -103,12 +103,18 @@ function createStoreContext<T extends State>() {
     return store.setState;
   }
 
+  function useGetState() {
+    const store = useStore();
+    return store.getState;
+  }
+
   return {
     StoreProvider,
     StoreConsumer: StoreContext.Consumer,
     useStore,
     useSlice,
     useSetState,
+    useGetState,
   };
 }
 
