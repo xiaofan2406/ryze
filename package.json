@@ -2,7 +2,7 @@
   "name": "ryze",
   "version": "0.0.7",
   "author": "Xiaofan Wu (https://github.com/xiaofan2406)",
-  "description": "",
+  "description": "A minimal state management library for React.",
   "keywords": [
     "ryze",
     "react",

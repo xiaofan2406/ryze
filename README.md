@@ -1,5 +1,15 @@
 # Ryze
 
+A minimal state management library for React.
+
+## Install
+
+```bash
+npm install ryze
+```
+
+## Example
+
 ```jsx
 import createStore from 'ryze';
 
@@ -57,3 +67,18 @@ const Example = () => {
   );
 };
 ```
+
+## constraints
+
+#### Selectors
+
+Selector passed to `useSlice` should have the same identity across re renders.
+
+That is,
+
+- either declare selectors outside of components, or
+- if the selector is dependent on component props, use `useCallback` to ensure the selector only changes when the prop change.
+
+#### Updates
+
+Updates should be immutable. Return new values, rather than modify the state value directly.
