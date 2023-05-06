@@ -59,7 +59,9 @@ function createStoreContext<StoreState extends State>(
     return state;
   }
 
+  function useSlice(): State;
   function useSlice<Slice>(selector: SelectorFunction<Slice>): Slice;
+  // TODO how to infer the type of value directly
   function useSlice<Slice extends ValueOf<StoreState>>(
     selector: keyof StoreState
   ): Slice;
