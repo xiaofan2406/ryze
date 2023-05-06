@@ -1,10 +1,9 @@
 import {useMemo} from 'react';
-import memoizeOne from 'memoize-one';
 import {unstable_batchedUpdates} from 'react-dom';
+import memoizeOne from 'memoize-one';
 import useSyncExternalStore from './useSyncExternalStore';
 
 type State = Record<string, unknown>;
-
 type Subscriber<T extends State> = (state: T) => void;
 type Updater<T extends State> = (prevState: T) => T;
 type ValueOf<T> = T[keyof T];
@@ -48,9 +47,7 @@ class Store<StoreState extends State> {
   };
 }
 
-function createStoreContext<StoreState extends State>(
-  initialState: StoreState
-) {
+function createStore<StoreState extends State>(initialState: StoreState) {
   const store = new Store(initialState);
 
   type SelectorFunction<R> = (state: StoreState) => R;
@@ -94,4 +91,4 @@ function createStoreContext<StoreState extends State>(
   return {store, useSlice};
 }
 
-export default createStoreContext;
+export default createStore;

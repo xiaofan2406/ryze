@@ -68,7 +68,7 @@ const Example = () => {
 };
 ```
 
-## constraints
+## Constraints
 
 #### Selectors
 
