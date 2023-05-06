@@ -1,3 +1,4 @@
+import React from 'react';
 import {it, vi, expect} from 'vitest';
 import {render, screen} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -106,7 +107,7 @@ it('renders selector function slice', async () => {
   expect(screen.getByTestId('count')).toHaveTextContent('odd');
 });
 
-it('should only update when its own slice changes', async () => {
+it('only updates when its own slice changes', async () => {
   const {store, useSlice} = createStoreContext({count: 10, history: ['a']});
 
   const History = vi.fn().mockImplementation(() => {
@@ -170,4 +171,143 @@ it('should only update when its own slice changes', async () => {
   expect(History).toHaveBeenCalledTimes(3);
   expect(Counter).toHaveBeenCalledTimes(3);
   expect(screen.getByTestId('history')).toHaveTextContent('aaa');
+});
+
+it('support dynamic string selector', async () => {
+  const {store, useSlice} = createStoreContext({
+    count: 10,
+    history: ['a', 'a'],
+  });
+  const Component = vi.fn().mockImplementation(() => {
+    const [name, setName] = React.useState('count');
+    const data = useSlice(name);
+
+    return (
+      <>
+        <div data-testid="target">
+          {name === 'count' ? data : data.join('')}
+        </div>
+        <button
+          data-testid="switch"
+          onClick={() =>
+            setName((prev) => (prev === 'count' ? 'history' : 'count'))
+          }
+        >
+          switch
+        </button>
+        <button
+          data-testid="add"
+          onClick={() => {
+            store.setState((prev) => ({...prev, count: prev.count + 1}));
+          }}
+        >
+          add
+        </button>
+        <button
+          data-testid="push"
+          onClick={() => {
+            store.setState((prev) => ({
+              ...prev,
+              history: [...prev.history, 'a'],
+            }));
+          }}
+        >
+          push
+        </button>
+      </>
+    );
+  });
+
+  const user = userEvent.setup();
+  render(<Component />);
+  expect(Component).toHaveBeenCalledTimes(1);
+  expect(screen.getByTestId('target')).toHaveTextContent('10');
+
+  // change history state but component is using count atm
+  await user.click(screen.getByTestId('push'));
+  expect(Component).toHaveBeenCalledTimes(1);
+  expect(screen.getByTestId('target')).toHaveTextContent('10');
+
+  // change to use history data
+  await user.click(screen.getByTestId('switch'));
+  expect(Component).toHaveBeenCalledTimes(2);
+  expect(screen.getByTestId('target')).toHaveTextContent('aaa');
+
+  await user.click(screen.getByTestId('push'));
+  expect(Component).toHaveBeenCalledTimes(3);
+  expect(screen.getByTestId('target')).toHaveTextContent('aaaa');
+
+  await user.click(screen.getByTestId('add'));
+  expect(Component).toHaveBeenCalledTimes(3);
+  expect(screen.getByTestId('target')).toHaveTextContent('aaaa');
+});
+
+it('support dynamic function selector', async () => {
+  const {store, useSlice} = createStoreContext({
+    count: 10,
+    history: ['a', 'a'],
+  });
+
+  const getHistoryLength = (state) => state.history.length;
+  const getIsCountEven = (state) => (state.count % 2 === 0 ? 'even' : 'odd');
+  const Component = vi.fn().mockImplementation(() => {
+    const [name, setName] = React.useState('count');
+    const data = useSlice(name === 'count' ? getIsCountEven : getHistoryLength);
+
+    return (
+      <>
+        <div data-testid="target">{data}</div>
+        <button
+          data-testid="switch"
+          onClick={() =>
+            setName((prev) => (prev === 'count' ? 'history' : 'count'))
+          }
+        >
+          switch
+        </button>
+        <button
+          data-testid="add"
+          onClick={() => {
+            store.setState((prev) => ({...prev, count: prev.count + 1}));
+          }}
+        >
+          add
+        </button>
+        <button
+          data-testid="push"
+          onClick={() => {
+            store.setState((prev) => ({
+              ...prev,
+              history: [...prev.history, 'a'],
+            }));
+          }}
+        >
+          push
+        </button>
+      </>
+    );
+  });
+
+  const user = userEvent.setup();
+  render(<Component />);
+  expect(Component).toHaveBeenCalledTimes(1);
+  expect(screen.getByTestId('target')).toHaveTextContent('even');
+
+  // change history state but component is using count atm
+  await user.click(screen.getByTestId('push'));
+  expect(Component).toHaveBeenCalledTimes(1);
+  expect(screen.getByTestId('target')).toHaveTextContent('even');
+
+  // change to use history data
+  await user.click(screen.getByTestId('switch'));
+  expect(Component).toHaveBeenCalledTimes(2);
+  expect(screen.getByTestId('target')).toHaveTextContent('3');
+
+  await user.click(screen.getByTestId('push'));
+  expect(Component).toHaveBeenCalledTimes(3);
+  expect(screen.getByTestId('target')).toHaveTextContent('4');
+
+  await user.click(screen.getByTestId('add'));
+  expect(Component).toHaveBeenCalledTimes(3);
+  expect(screen.getByTestId('target')).toHaveTextContent('4');
 });

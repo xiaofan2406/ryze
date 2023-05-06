@@ -66,8 +66,6 @@ function createStoreContext<StoreState extends State>(
     selector: keyof StoreState
   ): Slice;
   function useSlice<Slice>(selector: unknown = defaultSelector) {
-    console.log('useSlice', selector);
-
     const getSnapshot = useMemo(() => {
       if (typeof selector === 'string') {
         // There is no need to memoize for string path selector
