@@ -52,10 +52,11 @@
   "prettier": {
     "singleQuote": true,
     "trailingComma": "es5",
-    "arrowParens": "avoid",
+    "arrowParens": "always",
     "bracketSpacing": false
   },
   "dependencies": {
+    "memoize-one": "^6.0.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },

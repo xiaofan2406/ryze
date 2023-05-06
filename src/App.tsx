@@ -1,14 +1,25 @@
-import {useState} from 'react';
-import reactLogo from './assets/react.svg';
-import viteLogo from '/vite.svg';
-import {StoreProvider, useSetState, useSlice, useGetState} from './AppContext';
+import {ReactNode, useState} from 'react';
 import Example from './Example';
+import createStoreContext from './lib';
 
 import './App.css';
 
+type State = {
+  paths: number[];
+  obj: object;
+  num: number;
+  str: string;
+};
+
+const {store, useSlice} = createStoreContext({
+  paths: [],
+  obj: {},
+  num: 1,
+  str: 'never',
+} as State);
+
 const ChildStr = () => {
-  const str = useSlice(state => state.str) as string;
-  const setState = useSetState();
+  const str = useSlice((state) => state.str);
 
   console.log('ChildStr');
   return (
@@ -17,7 +28,7 @@ const ChildStr = () => {
       {str}
       <button
         onClick={() => {
-          setState(prev => ({
+          store.setState((prev) => ({
             ...prev,
             str: prev.str + 'k',
           }));
@@ -30,8 +41,7 @@ const ChildStr = () => {
 };
 
 const ChildNum = () => {
-  const num = useSlice(state => state.num) as string;
-  const setState = useSetState();
+  const num = useSlice((state) => state.num);
 
   console.log('ChildNum');
   return (
@@ -40,7 +50,7 @@ const ChildNum = () => {
       {num}
       <button
         onClick={() => {
-          setState(prev => ({
+          store.setState((prev) => ({
             ...prev,
             num: prev.num + 1,
           }));
@@ -58,8 +68,7 @@ const Another = () => {
 };
 
 const ChildPaths = () => {
-  const paths = useSlice(state => state.paths) as string;
-  const setState = useSetState();
+  const paths = useSlice((state) => state.paths);
 
   console.log('ChildPaths');
   return (
@@ -69,7 +78,7 @@ const ChildPaths = () => {
       <pre>{JSON.stringify(paths, null, 2)}</pre>
       <button
         onClick={() => {
-          setState(prev => ({
+          store.setState((prev) => ({
             ...prev,
             paths: [...prev.paths, Math.random()],
           }));
@@ -82,8 +91,7 @@ const ChildPaths = () => {
 };
 
 const ChildObj = () => {
-  const obj = useSlice(state => state.obj) as string;
-  const setState = useSetState();
+  const obj = useSlice((state) => state.obj);
 
   console.log('ChildObj');
   return (
@@ -92,7 +100,7 @@ const ChildObj = () => {
       <pre>{JSON.stringify(obj, null, 2)}</pre>
       <button
         onClick={() => {
-          setState(prev => ({
+          store.setState((prev) => ({
             ...prev,
             obj: {
               ...prev.obj,
@@ -108,10 +116,8 @@ const ChildObj = () => {
 };
 
 const Dynamic = () => {
-  const [name, setName] = useState('str');
-  // const selector = useCallback(state => state[name], [name]);
-
-  const slice = useSlice(name);
+  const [name, setName] = useState('str' as keyof State);
+  const slice = useSlice(name) as ReactNode;
 
   console.log('Dynamic');
   return (
@@ -120,7 +126,9 @@ const Dynamic = () => {
       <div>
         {name}: {slice}
       </div>
-      <button onClick={() => setName(prev => (prev === 'str' ? 'num' : 'str'))}>
+      <button
+        onClick={() => setName((prev) => (prev === 'str' ? 'num' : 'str'))}
+      >
         Toggle
       </button>
     </div>
@@ -128,11 +136,10 @@ const Dynamic = () => {
 };
 
 const GetState = () => {
-  const getState = useGetState();
   return (
     <button
       onClick={() => {
-        console.log(JSON.stringify(getState(), null, 2));
+        console.log(JSON.stringify(store.getState(), null, 2));
       }}
     >
       log getState
@@ -144,32 +151,15 @@ function App() {
   console.log('App');
 
   return (
-    <StoreProvider initialState={{paths: [], obj: {}, num: 1, str: 'never'}}>
+    <div>
+      <Dynamic />
       <ChildStr />
       <ChildNum />
-      <Dynamic />
       <ChildPaths />
       <ChildObj />
       <GetState />
       <Example />
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </StoreProvider>
+    </div>
   );
 }
 

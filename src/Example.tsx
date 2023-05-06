@@ -1,17 +1,51 @@
 import createStoreContext from './lib';
 
-const {StoreProvider, useSlice, useSetState} = createStoreContext();
+type State = {
+  count: number;
+  todos: {title: string; date: number; completed: boolean}[];
+};
 
-const Child = () => {
-  const count = useSlice(state => state.count);
-  const setState = useSetState();
+const {store, useSlice} = createStoreContext<State>({count: 10, todos: []});
+
+const Counter = () => {
+  const count = useSlice('count') as State['count'];
 
   return (
     <div>
       <div>count: {count}</div>
       <button
         onClick={() => {
-          setState(prev => ({...prev, count: prev.count + 1}));
+          store.setState((prev) => ({...prev, count: prev.count + 1}));
+        }}
+      >
+        Add
+      </button>
+    </div>
+  );
+};
+
+const getActiveTodos = (state: State) =>
+  state.todos.filter((item) => !item.completed);
+
+const Todos = () => {
+  const todos = useSlice(getActiveTodos);
+
+  return (
+    <div>
+      <ul>
+        {todos.map((todo) => (
+          <li key={todo.date}>{todo.title}</li>
+        ))}
+      </ul>
+      <button
+        onClick={() => {
+          store.setState((prev) => ({
+            ...prev,
+            todos: [
+              ...prev.todos,
+              {title: 'New Todo', date: +new Date(), completed: false},
+            ],
+          }));
         }}
       >
         Add
@@ -22,9 +56,10 @@ const Child = () => {
 
 const Example = () => {
   return (
-    <StoreProvider initialState={{count: 10}}>
-      <Child />
-    </StoreProvider>
+    <>
+      <Counter />
+      <Todos />
+    </>
   );
 };
 

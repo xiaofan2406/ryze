@@ -4,29 +4,15 @@ import {render, screen} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import createStoreContext from './index';
 
-const {StoreProvider, useSlice, useSetState} = createStoreContext();
-
-const Setup = ({
-  children,
-  initialState,
-}: {
-  children: ReactNode;
-  initialState?: object;
-}) => {
-  return <StoreProvider initialState={initialState}>{children}</StoreProvider>;
-};
-
 it('renders without initial state', () => {
+  const {useSlice} = createStoreContext({count: 10});
+
   const Component = vi.fn().mockImplementation(() => {
     useSlice();
     return null;
   });
 
-  render(
-    <Setup>
-      <Component />
-    </Setup>
-  );
+  render(<Component />);
 
   expect(Component).toHaveBeenCalledTimes(1);
 });
@@ -34,16 +20,16 @@ it('renders without initial state', () => {
 it('warns when state is not an object');
 
 it('renders with full state when no selector', async () => {
+  const {store, useSlice} = createStoreContext({count: 10});
   const Component = vi.fn().mockImplementation(() => {
     const state = useSlice();
-    const setState = useSetState();
     return (
       <div>
         <div data-testid="count">{state.count}</div>
         <button
           data-testid="add"
           onClick={() => {
-            setState(prev => ({...prev, count: prev.count + 1}));
+            store.setState((prev) => ({...prev, count: prev.count + 1}));
           }}
         >
           add
@@ -53,11 +39,7 @@ it('renders with full state when no selector', async () => {
   });
 
   const user = userEvent.setup();
-  render(
-    <Setup initialState={{count: 10}}>
-      <Component />
-    </Setup>
-  );
+  render(<Component />);
   expect(Component).toHaveBeenCalledTimes(1);
   expect(screen.getByTestId('count')).toHaveTextContent('10');
 
@@ -67,16 +49,16 @@ it('renders with full state when no selector', async () => {
 });
 
 it('renders string slice', async () => {
+  const {store, useSlice} = createStoreContext({count: 10});
   const Component = vi.fn().mockImplementation(() => {
     const count = useSlice('count');
-    const setState = useSetState();
     return (
       <div>
         <div data-testid="count">{count}</div>
         <button
           data-testid="add"
           onClick={() => {
-            setState(prev => ({...prev, count: prev.count + 1}));
+            store.setState((prev) => ({...prev, count: prev.count + 1}));
           }}
         >
           add
@@ -86,11 +68,7 @@ it('renders string slice', async () => {
   });
 
   const user = userEvent.setup();
-  render(
-    <Setup initialState={{count: 10}}>
-      <Component />
-    </Setup>
-  );
+  render(<Component />);
   expect(Component).toHaveBeenCalledTimes(1);
   expect(screen.getByTestId('count')).toHaveTextContent('10');
 
@@ -100,17 +78,17 @@ it('renders string slice', async () => {
 });
 
 it('renders selector function slice', async () => {
-  const getIsEven = state => state.count % 2 === 0;
+  const {store, useSlice} = createStoreContext({count: 10});
+  const getIsEven = (state) => state.count % 2 === 0;
   const Component = vi.fn().mockImplementation(() => {
     const isEven = useSlice(getIsEven);
-    const setState = useSetState();
     return (
       <div>
         <div data-testid="count">{isEven ? 'even' : 'odd'}</div>
         <button
           data-testid="add"
           onClick={() => {
-            setState(prev => ({...prev, count: prev.count + 1}));
+            store.setState((prev) => ({...prev, count: prev.count + 1}));
           }}
         >
           add
@@ -120,11 +98,7 @@ it('renders selector function slice', async () => {
   });
 
   const user = userEvent.setup();
-  render(
-    <Setup initialState={{count: 10}}>
-      <Component />
-    </Setup>
-  );
+  render(<Component />);
   expect(Component).toHaveBeenCalledTimes(1);
   expect(screen.getByTestId('count')).toHaveTextContent('even');
 
@@ -134,9 +108,10 @@ it('renders selector function slice', async () => {
 });
 
 it('should only update when its own slice changes', async () => {
+  const {store, useSlice} = createStoreContext({count: 10, history: ['a']});
+
   const History = vi.fn().mockImplementation(() => {
     const history = useSlice('history');
-    const setState = useSetState();
     return (
       <div>
         <div data-testid="history">
@@ -147,7 +122,7 @@ it('should only update when its own slice changes', async () => {
         <button
           data-testid="push"
           onClick={() => {
-            setState(prev => ({
+            store.setState((prev) => ({
               ...prev,
               history: [...prev.history, 'a'],
             }));
@@ -160,14 +135,13 @@ it('should only update when its own slice changes', async () => {
   });
   const Counter = vi.fn().mockImplementation(() => {
     const count = useSlice('count');
-    const setState = useSetState();
     return (
       <div>
         <div data-testid="count">{count}</div>
         <button
           data-testid="add"
           onClick={() => {
-            setState(prev => ({...prev, count: prev.count + 1}));
+            store.setState((prev) => ({...prev, count: prev.count + 1}));
           }}
         >
           add
@@ -178,10 +152,10 @@ it('should only update when its own slice changes', async () => {
 
   const user = userEvent.setup();
   render(
-    <Setup initialState={{count: 10, history: ['a']}}>
+    <>
       <Counter />
       <History />
-    </Setup>
+    </>
   );
   expect(Counter).toHaveBeenCalledTimes(1);
   expect(History).toHaveBeenCalledTimes(1);
