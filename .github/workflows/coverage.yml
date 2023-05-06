@@ -1,4 +1,4 @@
-name: Build
+name: Coverage
 
 on:
   push:
@@ -22,4 +22,6 @@ jobs:
           node-version: ${{ matrix.node-version }}
           cache: 'npm'
       - run: npm ci
-      - run: npm run build
+      - run: npm run coverage
+      - name: codecov
+        uses: codecov/codecov-action@v3.1.3

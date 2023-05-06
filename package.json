@@ -39,7 +39,8 @@
     "format": "prettier '**/*.{ts,tsx,js,jsx,json,css,md}' --write --ignore-path .gitignore",
     "dev": "vite",
     "build": "tsup",
-    "test": "vitest --config='./src/lib/vitest.config.ts'"
+    "test": "vitest --config='./src/lib/vitest.config.ts'",
+    "coverage": "vitest --config='./src/lib/vitest.config.ts' --coverage"
   },
   "lint-staged": {
     "*.{ts,tsx,js,jsx,json,css,md}": [
@@ -69,6 +70,7 @@
     "@typescript-eslint/eslint-plugin": "^5.57.1",
     "@typescript-eslint/parser": "^5.57.1",
     "@vitejs/plugin-react": "^4.0.0",
+    "@vitest/coverage-c8": "^0.31.0",
     "eslint": "^8.38.0",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.1",
