@@ -1,11 +1,11 @@
-import createStoreContext from './lib';
+import createStore from './lib';
 
 type State = {
   count: number;
   todos: {title: string; date: number; completed: boolean}[];
 };
 
-const {store, useSlice} = createStoreContext<State>({count: 10, todos: []});
+const {store, useSlice} = createStore<State>({count: 10, todos: []});
 
 const Counter = () => {
   const count = useSlice('count') as State['count'];

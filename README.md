@@ -1,9 +1,9 @@
 # Ryze
 
 ```jsx
-import createStoreContext from 'ryze';
+import createStore from 'ryze';
 
-const {store, useSlice} = createStoreContext({count: 10, todos: []});
+const {store, useSlice} = createStore({count: 10, todos: []});
 
 const Counter = () => {
   const count = useSlice('count');
