@@ -2,10 +2,10 @@ import React from 'react';
 import {it, vi, expect} from 'vitest';
 import {render, screen} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import createStoreContext from './index';
+import {createStore} from './index';
 
 it('renders without initial state', () => {
-  const {useSlice} = createStoreContext({count: 10});
+  const {useSlice} = createStore({count: 10});
 
   const Component = vi.fn().mockImplementation(() => {
     useSlice();
@@ -20,7 +20,7 @@ it('renders without initial state', () => {
 it('warns when state is not an object');
 
 it('renders with full state when no selector', async () => {
-  const {store, useSlice} = createStoreContext({count: 10});
+  const {store, useSlice} = createStore({count: 10});
   const Component = vi.fn().mockImplementation(() => {
     const state = useSlice();
     return (
@@ -49,7 +49,7 @@ it('renders with full state when no selector', async () => {
 });
 
 it('renders string slice', async () => {
-  const {store, useSlice} = createStoreContext({count: 10});
+  const {store, useSlice} = createStore({count: 10});
   const Component = vi.fn().mockImplementation(() => {
     const count = useSlice('count');
     return (
@@ -78,7 +78,7 @@ it('renders string slice', async () => {
 });
 
 it('renders selector function slice', async () => {
-  const {store, useSlice} = createStoreContext({count: 10});
+  const {store, useSlice} = createStore({count: 10});
   const getIsEven = (state) => state.count % 2 === 0;
   const Component = vi.fn().mockImplementation(() => {
     const isEven = useSlice(getIsEven);
@@ -108,7 +108,7 @@ it('renders selector function slice', async () => {
 });
 
 it('only updates when its own slice changes', async () => {
-  const {store, useSlice} = createStoreContext({count: 10, history: ['a']});
+  const {store, useSlice} = createStore({count: 10, history: ['a']});
 
   const History = vi.fn().mockImplementation(() => {
     const history = useSlice('history');
@@ -174,7 +174,7 @@ it('only updates when its own slice changes', async () => {
 });
 
 it('support dynamic string selector', async () => {
-  const {store, useSlice} = createStoreContext({
+  const {store, useSlice} = createStore({
     count: 10,
     history: ['a', 'a'],
   });
@@ -243,7 +243,7 @@ it('support dynamic string selector', async () => {
 });
 
 it('support dynamic function selector', async () => {
-  const {store, useSlice} = createStoreContext({
+  const {store, useSlice} = createStore({
     count: 10,
     history: ['a', 'a'],
   });
