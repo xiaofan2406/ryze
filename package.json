@@ -38,7 +38,8 @@
     "lint": "npm run lint:eslint && npm run lint:prettier",
     "format": "prettier '**/*.{ts,tsx,js,jsx,json,css,md}' --write --ignore-path .gitignore",
     "dev": "vite",
-    "build": "tsup",
+    "build": "tsc && tsup",
+    "preversion": "npm run build",
     "test": "vitest --config='./src/lib/vitest.config.ts'",
     "coverage": "vitest --config='./src/lib/vitest.config.ts' --coverage"
   },

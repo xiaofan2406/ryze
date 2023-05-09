@@ -1,15 +1,15 @@
-import createStore from './lib';
+import {createStoreContext} from './lib';
 
 type State = {
   count: number;
   todos: {title: string; date: number; completed: boolean}[];
 };
 
-const {store, useSlice} = createStore<State>({count: 10, todos: []});
+const {StoreProvider, useStore, useSlice} = createStoreContext<State>();
 
-const Counter = () => {
+function Counter() {
   const count = useSlice('count') as State['count'];
-
+  const store = useStore();
   return (
     <div>
       <div>count: {count}</div>
@@ -22,13 +22,14 @@ const Counter = () => {
       </button>
     </div>
   );
-};
+}
 
 const getActiveTodos = (state: State) =>
   state.todos.filter((item) => !item.completed);
 
-const Todos = () => {
+function Todos() {
   const todos = useSlice(getActiveTodos);
+  const store = useStore();
 
   return (
     <div>
@@ -52,15 +53,15 @@ const Todos = () => {
       </button>
     </div>
   );
-};
+}
 
-const Example = () => {
+function ContextExample() {
   return (
-    <>
+    <StoreProvider initialState={{count: 10, todos: []}}>
       <Counter />
       <Todos />
-    </>
+    </StoreProvider>
   );
-};
+}
 
-export default Example;
+export default ContextExample;

@@ -11,7 +11,7 @@ npm install ryze
 ## Example
 
 ```jsx
-import createStore from 'ryze';
+import {createStore} from 'ryze';
 
 const {store, useSlice} = createStore({count: 10, todos: []});
 
@@ -70,7 +70,7 @@ const Example = () => {
 
 ## Constraints
 
-#### Selectors
+### Selectors
 
 Selector passed to `useSlice` should have the same identity across re renders.
 
@@ -79,6 +79,6 @@ That is,
 - either declare selectors outside of components, or
 - if the selector is dependent on component props, use `useCallback` to ensure the selector only changes when the prop change.
 
-#### Updates
+### Updates
 
 Updates should be immutable. Return new values, rather than modify the state value directly.
