@@ -8,13 +8,18 @@ type Subscriber<T extends State> = (state: T) => void;
 type Updater<T extends State> = (prevState: T) => T;
 type ValueOf<T> = T[keyof T];
 type SelectorFunction<S, R> = (state: S) => R;
+type Initializer<T extends State> = T | (() => T);
 
 class Store<StoreState extends State> {
   #state: StoreState;
   #subscribers: Subscriber<StoreState>[];
   #_initialState: StoreState;
 
-  constructor(initialState = {} as StoreState) {
+  constructor(initializer: Initializer<StoreState> = {} as StoreState) {
+    const initialState =
+      typeof initializer === 'function'
+        ? (initializer as () => StoreState)()
+        : initializer;
     this.#state = initialState;
     this.#subscribers = [];
     this.#_initialState = initialState;
@@ -53,9 +58,9 @@ function defaultSelector<StoreState>(state: StoreState) {
 }
 
 export function createStore<StoreState extends State>(
-  initialState: StoreState
+  initializer: Initializer<StoreState>
 ) {
-  const store = new Store(initialState);
+  const store = new Store(initializer);
 
   function useSlice(): State;
   function useSlice<Slice>(
@@ -111,7 +116,7 @@ export function createStoreContext<StoreState extends State>() {
     initialState = {} as StoreState,
   }: {
     children: ReactNode;
-    initialState?: StoreState;
+    initialState?: Initializer<StoreState>;
   }) {
     const [value] = useState(() => createStore(initialState));
 

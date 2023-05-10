@@ -107,6 +107,36 @@ it('renders selector function slice', async () => {
   expect(screen.getByTestId('count')).toHaveTextContent('odd');
 });
 
+it('supports initializer function', async () => {
+  const {store, useSlice} = createStore(() => ({count: 10}));
+  const getIsEven = (state) => state.count % 2 === 0;
+  const Component = vi.fn().mockImplementation(() => {
+    const isEven = useSlice(getIsEven);
+    return (
+      <div>
+        <div data-testid="count">{isEven ? 'even' : 'odd'}</div>
+        <button
+          data-testid="add"
+          onClick={() => {
+            store.setState((prev) => ({...prev, count: prev.count + 1}));
+          }}
+        >
+          add
+        </button>
+      </div>
+    );
+  });
+
+  const user = userEvent.setup();
+  render(<Component />);
+  expect(Component).toHaveBeenCalledTimes(1);
+  expect(screen.getByTestId('count')).toHaveTextContent('even');
+
+  await user.click(screen.getByTestId('add'));
+  expect(Component).toHaveBeenCalledTimes(2);
+  expect(screen.getByTestId('count')).toHaveTextContent('odd');
+});
+
 it('only updates when its own slice changes', async () => {
   const {store, useSlice} = createStore({count: 10, history: ['a']});
 
