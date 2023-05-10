@@ -203,6 +203,49 @@ it('only updates when its own slice changes', async () => {
   expect(screen.getByTestId('history')).toHaveTextContent('aaa');
 });
 
+it('only update once when there are multiple subscriptions in one component', async () => {
+  const {store, useSlice} = createStore({count: 10, history: ['a']});
+
+  const getHistoryLength = (state) => state.history.length;
+  const Component = vi.fn().mockImplementation(() => {
+    const count = useSlice('count');
+    const length = useSlice(getHistoryLength);
+
+    return (
+      <div>
+        <div data-testid="count">
+          {count} {length}
+        </div>
+        <button
+          data-testid="add"
+          onClick={() => {
+            store.setState((prev) => ({
+              ...prev,
+              count: prev.count + 1,
+              history: [...prev.history, 'a'],
+            }));
+          }}
+        >
+          add
+        </button>
+      </div>
+    );
+  });
+
+  const user = userEvent.setup();
+  render(<Component />);
+  expect(Component).toHaveBeenCalledTimes(1);
+  expect(screen.getByTestId('count')).toHaveTextContent('10 1');
+
+  await user.click(screen.getByTestId('add'));
+  expect(Component).toHaveBeenCalledTimes(2);
+  expect(screen.getByTestId('count')).toHaveTextContent('11 2');
+
+  await user.click(screen.getByTestId('add'));
+  expect(Component).toHaveBeenCalledTimes(3);
+  expect(screen.getByTestId('count')).toHaveTextContent('12 3');
+});
+
 it('support dynamic string selector', async () => {
   const {store, useSlice} = createStore({
     count: 10,
