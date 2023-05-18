@@ -384,3 +384,56 @@ it('support dynamic function selector', async () => {
   expect(Component).toHaveBeenCalledTimes(3);
   expect(screen.getByTestId('target')).toHaveTextContent('4');
 });
+
+it('resets initial state', async () => {
+  const {store, useSlice} = createStore({count: 10, history: ['a']});
+
+  const getHistoryLength = (state) => state.history.length;
+  const Component = vi.fn().mockImplementation(() => {
+    const count = useSlice('count');
+    const length = useSlice(getHistoryLength);
+
+    return (
+      <div>
+        <div data-testid="count">
+          {count} {length}
+        </div>
+        <button
+          data-testid="add"
+          onClick={() => {
+            store.setState((prev) => ({
+              ...prev,
+              count: prev.count + 1,
+              history: [...prev.history, 'a'],
+            }));
+          }}
+        >
+          add
+        </button>
+
+        <button
+          data-testid="reset"
+          onClick={() => {
+            store.reset();
+          }}
+        >
+          reset
+        </button>
+      </div>
+    );
+  });
+
+  const user = userEvent.setup();
+  render(<Component />);
+  expect(screen.getByTestId('count')).toHaveTextContent('10 1');
+
+  await user.click(screen.getByTestId('add'));
+  await user.click(screen.getByTestId('add'));
+  await user.click(screen.getByTestId('add'));
+  expect(Component).toHaveBeenCalledTimes(4);
+  expect(screen.getByTestId('count')).toHaveTextContent('13 4');
+
+  await user.click(screen.getByTestId('reset'));
+  expect(Component).toHaveBeenCalledTimes(5);
+  expect(screen.getByTestId('count')).toHaveTextContent('10 1');
+});

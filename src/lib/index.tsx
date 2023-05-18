@@ -13,7 +13,7 @@ type Initializer<T extends State> = T | (() => T);
 class Store<StoreState extends State> {
   #state: StoreState;
   #subscribers: Subscriber<StoreState>[];
-  #_initialState: StoreState;
+  #initialState: StoreState;
 
   constructor(initializer: Initializer<StoreState> = {} as StoreState) {
     const initialState =
@@ -22,12 +22,12 @@ class Store<StoreState extends State> {
         : initializer;
     this.#state = initialState;
     this.#subscribers = [];
-    this.#_initialState = initialState;
+    this.#initialState = initialState;
   }
 
   reset = () => {
-    this.#state = this.#_initialState;
-    this.#subscribers = [];
+    this.#state = this.#initialState;
+    this.#broadcast();
   };
 
   setState = (updater: Updater<StoreState>) => {
