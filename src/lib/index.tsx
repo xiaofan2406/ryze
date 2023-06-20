@@ -1,7 +1,13 @@
-import {ReactNode, createContext, useContext, useMemo, useState} from 'react';
+import {
+  ReactNode,
+  createContext,
+  useContext,
+  useMemo,
+  useState,
+  useSyncExternalStore,
+} from 'react';
 import {unstable_batchedUpdates} from 'react-dom';
 import memoizeOne from 'memoize-one';
-import useSyncExternalStore from './useSyncExternalStore';
 
 type State = Record<string, unknown>;
 type Subscriber<T extends State> = (state: T) => void;
