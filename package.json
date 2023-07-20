@@ -58,7 +58,9 @@
     "bracketSpacing": false
   },
   "dependencies": {
-    "memoize-one": "^6.0.0",
+    "memoize-one": "^6.0.0"
+  },
+  "peerDependencies": {
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },
@@ -79,6 +81,8 @@
     "jsdom": "^22.1.0",
     "lint-staged": "^13.2.3",
     "prettier": "^2.8.8",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
     "tsup": "^7.1.0",
     "typescript": "^5.1.6",
     "vite": "^4.3.9",
