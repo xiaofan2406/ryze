@@ -16,7 +16,7 @@
   },
   "license": "MIT",
   "engines": {
-    "node": "^v18.17.1"
+    "node": "^18.18.0"
   },
   "type": "module",
   "files": [
