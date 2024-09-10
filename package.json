@@ -39,7 +39,8 @@
     "format": "prettier '**/*.{ts,tsx,js,jsx,json,css,md}' --write --ignore-path .gitignore",
     "dev": "vite",
     "build": "tsc && tsup",
-    "preversion": "npm run build",
+    "preversion": "npm i && npm run build",
+    "postversion": "git push -u origin $(git rev-parse --abbrev-ref HEAD) --follow-tags && npm publish && echo '…released.'",
     "test": "vitest",
     "coverage": "vitest --coverage"
   },
