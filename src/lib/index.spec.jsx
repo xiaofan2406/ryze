@@ -1,8 +1,8 @@
-import React from 'react';
+import {useState} from 'react';
 import {it, vi, expect} from 'vitest';
 import {render, screen} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import {createStore} from './index';
+import {createStore, createStoreContext} from './index';
 
 it('renders without initial state', () => {
   const {useSlice} = createStore({count: 10});
@@ -252,7 +252,7 @@ it('support dynamic string selector', async () => {
     history: ['a', 'a'],
   });
   const Component = vi.fn().mockImplementation(() => {
-    const [name, setName] = React.useState('count');
+    const [name, setName] = useState('count');
     const data = useSlice(name);
 
     return (
@@ -324,7 +324,7 @@ it('support dynamic function selector', async () => {
   const getHistoryLength = (state) => state.history.length;
   const getIsCountEven = (state) => (state.count % 2 === 0 ? 'even' : 'odd');
   const Component = vi.fn().mockImplementation(() => {
-    const [name, setName] = React.useState('count');
+    const [name, setName] = useState('count');
     const data = useSlice(name === 'count' ? getIsCountEven : getHistoryLength);
 
     return (
@@ -436,4 +436,86 @@ it('resets initial state', async () => {
   await user.click(screen.getByTestId('reset'));
   expect(Component).toHaveBeenCalledTimes(5);
   expect(screen.getByTestId('count')).toHaveTextContent('10 1');
+});
+
+it('supports context version', async () => {
+  const {StoreProvider, useSlice, useStore} = createStoreContext();
+
+  const Demo = vi.fn().mockImplementation(() => {
+    const store = useStore();
+    const [name, setName] = useState('count');
+    const data = useSlice(name);
+
+    return (
+      <>
+        <div data-testid="target">
+          {name === 'count' ? data : data.join('')}
+        </div>
+        <button
+          data-testid="switch"
+          onClick={() =>
+            setName((prev) => (prev === 'count' ? 'history' : 'count'))
+          }
+        >
+          switch
+        </button>
+        <button
+          data-testid="add"
+          onClick={() => {
+            store.setState((prev) => ({...prev, count: prev.count + 1}));
+          }}
+        >
+          add
+        </button>
+        <button
+          data-testid="push"
+          onClick={() => {
+            store.setState((prev) => ({
+              ...prev,
+              history: [...prev.history, 'a'],
+            }));
+          }}
+        >
+          push
+        </button>
+      </>
+    );
+  });
+
+  const Component = vi.fn().mockImplementation(() => {
+    return (
+      <StoreProvider
+        initialState={{
+          count: 10,
+          history: ['a', 'a'],
+        }}
+      >
+        <Demo />
+      </StoreProvider>
+    );
+  });
+
+  const user = userEvent.setup();
+  render(<Component />);
+
+  expect(Demo).toHaveBeenCalledTimes(1);
+  expect(screen.getByTestId('target')).toHaveTextContent('10');
+
+  // change history state but component is using count atm
+  await user.click(screen.getByTestId('push'));
+  expect(Demo).toHaveBeenCalledTimes(1);
+  expect(screen.getByTestId('target')).toHaveTextContent('10');
+
+  // change to use history data
+  await user.click(screen.getByTestId('switch'));
+  expect(Demo).toHaveBeenCalledTimes(2);
+  expect(screen.getByTestId('target')).toHaveTextContent('aaa');
+
+  await user.click(screen.getByTestId('push'));
+  expect(Demo).toHaveBeenCalledTimes(3);
+  expect(screen.getByTestId('target')).toHaveTextContent('aaaa');
+
+  await user.click(screen.getByTestId('add'));
+  expect(Demo).toHaveBeenCalledTimes(3);
+  expect(screen.getByTestId('target')).toHaveTextContent('aaaa');
 });
