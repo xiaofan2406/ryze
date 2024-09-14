@@ -1,6 +1,6 @@
 {
   "name": "ryze",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "author": "Xiaofan Wu (https://github.com/xiaofan2406)",
   "description": "A minimal state management library for React.",
   "keywords": [
