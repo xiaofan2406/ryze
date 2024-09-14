@@ -68,7 +68,7 @@ export function createStore<StoreState extends State>(
   const store = new Store(initializer);
 
   function useSlice<Slice>(
-    selector: keyof StoreState | SelectorFunction<StoreState, Slice>
+    selector?: keyof StoreState | SelectorFunction<StoreState, Slice>
   ) {
     const getSnapshot = useMemo(() => {
       if (typeof selector === 'string') {
@@ -78,16 +78,15 @@ export function createStore<StoreState extends State>(
         return () => store.getState()[selector] as Slice;
       }
 
-      const _selector = (
-        selector !== undefined ? selector : defaultSelector<StoreState>
-      ) as SelectorFunction<StoreState, Slice>;
+      const _selector = (selector ??
+        defaultSelector<StoreState>) as SelectorFunction<StoreState, Slice>;
       // Memoizing the result against the selector
       // if a selector is different in every render,
       // - if it returns a path in state directly, it wont rerender as useSyncExternalStore takes care of that change
       // - if it returns a derived result from state, it will re render even if the result does not change
       // Therefore, it is important to declare ensure the selector has the same identity across renders
-      const memo = memoizeOne(_selector);
-      return () => memo(store.getState());
+      const memoizedSelector = memoizeOne(_selector);
+      return () => memoizedSelector(store.getState());
     }, [selector]);
 
     const slice = useSyncExternalStore<Slice>(store.subscribe, getSnapshot);
@@ -123,7 +122,7 @@ export function createStoreContext<StoreState extends State>() {
   }
 
   function useSlice<Slice>(
-    selector: keyof StoreState | SelectorFunction<StoreState, Slice>
+    selector?: keyof StoreState | SelectorFunction<StoreState, Slice>
   ) {
     const {useSlice: useCtxSlice} = useContext(StoreContext);
     return useCtxSlice(selector);
