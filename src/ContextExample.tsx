@@ -1,8 +1,10 @@
+import {useMemo} from 'react';
+import {createSelector} from 'reselect';
 import {createStoreContext} from './lib';
 
 type State = {
   count: number;
-  todos: {title: string; date: number; completed: boolean}[];
+  todos: {title: string; id: number; completed: boolean}[];
 };
 
 const {StoreProvider, useStore, useSlice} = createStoreContext<State>();
@@ -24,18 +26,37 @@ function Counter() {
   );
 }
 
-const getActiveTodos = (state: State) =>
-  state.todos.filter((item) => !item.completed);
+const makeGetTodos = (completed) =>
+  createSelector(
+    (state) => state.todos,
+    (todos) => todos.filter((item) => item.completed === completed)
+  );
 
-function Todos() {
-  const todos = useSlice(getActiveTodos);
+function Todos({completed = false}: {completed?: boolean}) {
+  const getTodos = useMemo(() => makeGetTodos(completed), [completed]);
+  const todos = useSlice(getTodos);
   const store = useStore();
 
+  console.log('Todos', completed);
   return (
     <div>
       <ul>
         {todos.map((todo) => (
-          <li key={todo.date}>{todo.title}</li>
+          <li
+            key={todo.id}
+            onClick={() => {
+              store.setState((prev) => ({
+                ...prev,
+                todos: prev.todos.map((entry) =>
+                  todo.id === entry.id
+                    ? {...entry, completed: !entry.completed}
+                    : entry
+                ),
+              }));
+            }}
+          >
+            ({todo.id}){todo.title}
+          </li>
         ))}
       </ul>
       <button
@@ -44,7 +65,7 @@ function Todos() {
             ...prev,
             todos: [
               ...prev.todos,
-              {title: 'New Todo', date: +new Date(), completed: false},
+              {title: 'New Todo', id: uid(), completed: false},
             ],
           }));
         }}
@@ -59,9 +80,17 @@ function ContextExample() {
   return (
     <StoreProvider initialState={{count: 10, todos: []}}>
       <Counter />
+      <h2>Todo:</h2>
       <Todos />
+      <h2>Completed:</h2>
+      <Todos completed />
     </StoreProvider>
   );
 }
 
 export default ContextExample;
+
+let id = 0;
+function uid() {
+  return id++;
+}
