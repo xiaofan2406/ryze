@@ -1,3 +1,4 @@
+import {createSelector} from 'reselect';
 import {createStore} from './lib';
 
 type State = {
@@ -8,7 +9,7 @@ type State = {
 const {store, useSlice} = createStore<State>({count: 10, todos: []});
 
 function Counter() {
-  const count = useSlice('count') as State['count'];
+  const count = useSlice<number>('count');
 
   return (
     <div>
@@ -24,9 +25,10 @@ function Counter() {
   );
 }
 
-function getActiveTodos(state: State) {
-  return state.todos.filter((item) => !item.completed);
-}
+const getActiveTodos = createSelector(
+  (state: State) => state.todos,
+  (todos) => todos.filter((item) => !item.completed)
+);
 
 function Todos() {
   const todos = useSlice(getActiveTodos);
