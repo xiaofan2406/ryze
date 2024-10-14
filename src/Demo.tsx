@@ -1,4 +1,4 @@
-import {ReactNode, useState} from 'react';
+import {useState} from 'react';
 import {createStore} from './lib';
 
 type State = {
@@ -113,8 +113,8 @@ function ChildObj() {
 }
 
 function Dynamic() {
-  const [name, setName] = useState('str' as keyof State);
-  const slice = useSlice(name) as ReactNode;
+  const [name, setName] = useState('str');
+  const slice = useSlice<string>(name as keyof State);
 
   console.log('Dynamic');
   return (

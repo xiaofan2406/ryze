@@ -10,7 +10,7 @@ type State = {
 const {StoreProvider, useStore, useSlice} = createStoreContext<State>();
 
 function Counter() {
-  const count = useSlice('count') as State['count'];
+  const count = useSlice<number>('count');
   const store = useStore();
   return (
     <div>
@@ -26,9 +26,9 @@ function Counter() {
   );
 }
 
-const makeGetTodos = (completed) =>
+const makeGetTodos = (completed: boolean) =>
   createSelector(
-    (state) => state.todos,
+    (state: State) => state.todos,
     (todos) => todos.filter((item) => item.completed === completed)
   );
 

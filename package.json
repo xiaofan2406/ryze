@@ -33,22 +33,22 @@
   },
   "scripts": {
     "prepare": "husky",
-    "lint:eslint": "eslint src --ext ts,tsx,js,jsx --report-unused-disable-directives --max-warnings 0",
-    "lint:prettier": "prettier '**/*.{ts,tsx,js,jsx,json,css,md}' --check --ignore-path .gitignore",
+    "lint:eslint": "eslint .",
+    "lint:prettier": "prettier '**/*.{ts,tsx,mjs,cjs,js,jsx,json,css,md}' --check --ignore-path .gitignore",
     "lint": "npm run lint:eslint && npm run lint:prettier",
-    "format": "prettier '**/*.{ts,tsx,js,jsx,json,css,md}' --write --ignore-path .gitignore",
+    "format": "prettier '**/*.{ts,tsx,mjs,cjs,js,jsx,json,css,md}' --write --ignore-path .gitignore",
     "dev": "vite",
-    "build": "tsc && tsup",
+    "build": "tsc -b && tsup",
     "preversion": "npm i && npm run build",
     "postversion": "git push -u origin $(git rev-parse --abbrev-ref HEAD) --follow-tags && npm publish && echo '…released.'",
     "test": "vitest",
     "coverage": "vitest --coverage"
   },
   "lint-staged": {
-    "*.{ts,tsx,js,jsx,json,css,md}": [
+    "*.{ts,tsx,mjs,cjs,js,jsx,json,css,md}": [
       "prettier --write"
     ],
-    "*.{ts,tsx,js,jsx}": [
+    "*.{ts,tsx,mjs,cjs,js,jsx}": [
       "eslint"
     ]
   },
@@ -66,18 +66,20 @@
     "react-dom": "^18.2.0"
   },
   "devDependencies": {
+    "@eslint/compat": "^1.2.0",
+    "@eslint/js": "^9.12.0",
     "@testing-library/jest-dom": "^6.5.0",
     "@testing-library/react": "^16.0.1",
     "@testing-library/user-event": "^14.5.2",
+    "@types/eslint__js": "^8.42.3",
     "@types/react": "^18.3.5",
     "@types/react-dom": "^18.3.0",
-    "@typescript-eslint/eslint-plugin": "^8.5.0",
-    "@typescript-eslint/parser": "^8.5.0",
     "@vitejs/plugin-react": "^4.3.1",
     "@vitest/coverage-v8": "^2.0.5",
-    "eslint": "^8.57.0",
-    "eslint-plugin-react-hooks": "^4.6.2",
-    "eslint-plugin-react-refresh": "^0.4.11",
+    "eslint": "^9.12.0",
+    "eslint-plugin-react-hooks": "^5.0.0",
+    "eslint-plugin-react-refresh": "^0.4.12",
+    "globals": "^15.11.0",
     "happy-dom": "^15.7.3",
     "husky": "^9.1.5",
     "lint-staged": "^15.2.10",
@@ -87,6 +89,7 @@
     "reselect": "^5.1.1",
     "tsup": "^8.2.4",
     "typescript": "^5.6.2",
+    "typescript-eslint": "^8.9.0",
     "vite": "^5.4.3",
     "vitest": "^2.0.5"
   }
