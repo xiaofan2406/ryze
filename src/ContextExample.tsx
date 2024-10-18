@@ -79,6 +79,7 @@ function Todos({completed = false}: {completed?: boolean}) {
 function ContextExample() {
   return (
     <StoreProvider initialState={{count: 10, todos: []}}>
+      <h1>ContextExample</h1>
       <Counter />
       <h2>Todo:</h2>
       <Todos />

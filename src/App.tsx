@@ -1,12 +1,13 @@
 import ContextExample from './ContextExample';
+import Demo from './Demo';
 
 import './App.css';
 
 function App() {
   return (
     <div>
-      <h2>Context Example</h2>
       <ContextExample />
+      <Demo />
     </div>
   );
 }
