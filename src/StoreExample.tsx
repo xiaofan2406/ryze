@@ -60,6 +60,7 @@ function Todos() {
 function StoreExample() {
   return (
     <>
+      <h1>StoreExample</h1>
       <Counter />
       <Todos />
     </>
