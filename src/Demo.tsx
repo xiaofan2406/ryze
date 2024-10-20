@@ -1,5 +1,5 @@
 import {useState} from 'react';
-import {createStore} from './lib';
+import {createStore, useSlice} from './lib';
 
 type State = {
   paths: number[];
@@ -8,7 +8,7 @@ type State = {
   str: string;
 };
 
-const {store, useSlice} = createStore({
+const {store} = createStore({
   paths: [],
   obj: {},
   num: 1,
@@ -16,7 +16,7 @@ const {store, useSlice} = createStore({
 } as State);
 
 function ChildStr() {
-  const str = useSlice((state) => state.str);
+  const str = useSlice(store, (state) => state.str);
 
   console.log('ChildStr');
   return (
@@ -38,7 +38,7 @@ function ChildStr() {
 }
 
 function ChildNum() {
-  const num = useSlice((state) => state.num);
+  const num = useSlice(store, (state) => state.num);
 
   console.log('ChildNum');
   return (
@@ -59,18 +59,12 @@ function ChildNum() {
   );
 }
 
-function Another() {
-  console.log('Another');
-  return null;
-}
-
 function ChildPaths() {
-  const paths = useSlice((state) => state.paths);
+  const paths = useSlice(store, (state) => state.paths);
 
   console.log('ChildPaths');
   return (
     <div style={{marginBottom: 24}}>
-      <Another />
       <h2>ChildPaths</h2>
       <pre>{JSON.stringify(paths, null, 2)}</pre>
       <button
@@ -88,7 +82,7 @@ function ChildPaths() {
 }
 
 function ChildObj() {
-  const obj = useSlice((state) => state.obj);
+  const obj = useSlice(store, (state) => state.obj);
 
   console.log('ChildObj');
   return (
@@ -114,7 +108,7 @@ function ChildObj() {
 
 function Dynamic() {
   const [name, setName] = useState('str');
-  const slice = useSlice<string>(name as keyof State);
+  const slice: string = useSlice(store, name);
 
   console.log('Dynamic');
   return (
@@ -147,6 +141,7 @@ function GetState() {
 function Demo() {
   return (
     <>
+      <h1>Demo</h1>
       <ChildStr />
       <ChildNum />
       <ChildPaths />
