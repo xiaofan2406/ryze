@@ -1,11 +1,11 @@
 import {
-  ReactNode,
   createContext,
   useContext,
   useMemo,
   useState,
   useSyncExternalStore,
 } from 'react';
+import type {ReactNode} from 'react';
 import {unstable_batchedUpdates} from 'react-dom';
 import memoizeOne from 'memoize-one';
 
