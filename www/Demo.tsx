@@ -1,5 +1,5 @@
 import {useState} from 'react';
-import {createStore, useSlice} from './lib';
+import {createStore, useSlice} from '../src';
 
 type State = {
   paths: number[];

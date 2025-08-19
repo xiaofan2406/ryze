@@ -1,6 +1,6 @@
 import {useMemo} from 'react';
 import {createSelector} from 'reselect';
-import {createStoreContext} from './lib';
+import {createStoreContext} from '../src';
 
 type State = {
   count: number;

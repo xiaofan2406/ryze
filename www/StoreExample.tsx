@@ -1,5 +1,5 @@
 import {createSelector} from 'reselect';
-import {createStore} from './lib';
+import {createStore} from '../src';
 
 type State = {
   count: number;
