@@ -15,7 +15,7 @@ type Initializer<T extends State> = T | (() => T);
 type SelectorFn<S, R> = (state: S) => R;
 type Selector<S, R> = string | SelectorFn<S, R>;
 
-class Store<StoreState extends State> {
+export class Store<StoreState extends State> {
   #state: StoreState;
   #subscribers: Subscriber[];
   #initialState: StoreState;
