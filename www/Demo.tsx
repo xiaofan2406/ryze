@@ -1,5 +1,5 @@
 import {useState} from 'react';
-import {createStore, useSlice} from '../src';
+import {createStore, useSlice, useSetSlice} from '../src';
 
 type State = {
   paths: number[];
@@ -17,6 +17,7 @@ const {store} = createStore({
 
 function ChildStr() {
   const str = useSlice(store, (state) => state.str);
+  const setStr = useSetSlice(store, 'str');
 
   console.log('ChildStr');
   return (
@@ -25,10 +26,7 @@ function ChildStr() {
       {str}
       <button
         onClick={() => {
-          store.setState((prev) => ({
-            ...prev,
-            str: prev.str + 'k',
-          }));
+          setStr((prev) => prev + 'k');
         }}
       >
         add
@@ -39,6 +37,7 @@ function ChildStr() {
 
 function ChildNum() {
   const num = useSlice(store, (state) => state.num);
+  const setNum = useSetSlice(store, 'num');
 
   console.log('ChildNum');
   return (
@@ -47,10 +46,7 @@ function ChildNum() {
       {num}
       <button
         onClick={() => {
-          store.setState((prev) => ({
-            ...prev,
-            num: prev.num + 1,
-          }));
+          setNum((prev) => prev + 1);
         }}
       >
         add
@@ -61,6 +57,7 @@ function ChildNum() {
 
 function ChildPaths() {
   const paths = useSlice(store, (state) => state.paths);
+  const setPaths = useSetSlice(store, 'paths');
 
   console.log('ChildPaths');
   return (
@@ -69,10 +66,7 @@ function ChildPaths() {
       <pre>{JSON.stringify(paths, null, 2)}</pre>
       <button
         onClick={() => {
-          store.setState((prev) => ({
-            ...prev,
-            paths: [...prev.paths, Math.random()],
-          }));
+          setPaths((prev) => [...prev, Math.random()]);
         }}
       >
         add
@@ -83,6 +77,7 @@ function ChildPaths() {
 
 function ChildObj() {
   const obj = useSlice(store, (state) => state.obj);
+  const setObj = useSetSlice(store, 'obj');
 
   console.log('ChildObj');
   return (
@@ -91,13 +86,7 @@ function ChildObj() {
       <pre>{JSON.stringify(obj, null, 2)}</pre>
       <button
         onClick={() => {
-          store.setState((prev) => ({
-            ...prev,
-            obj: {
-              ...prev.obj,
-              x: 1,
-            },
-          }));
+          setObj((prev) => ({...prev, x: 1}));
         }}
       >
         add

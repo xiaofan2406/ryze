@@ -1,5 +1,6 @@
 import {
   createContext,
+  useCallback,
   useContext,
   useMemo,
   useState,
@@ -9,18 +10,20 @@ import type {ReactNode} from 'react';
 import {unstable_batchedUpdates} from 'react-dom';
 import memoizeOne from 'memoize-one';
 
-type State = Record<string, unknown>;
-type Subscriber = () => void;
-type Initializer<T> = T | (() => T);
+export type State = Record<string, unknown>;
+export type Subscriber = () => void;
+export type Initializer<T> = T | (() => T);
 
 export class Store<StoreState extends State> {
   #state: StoreState;
   #subscribers: Subscriber[];
   #initialState: StoreState;
 
-  constructor(initializer: Initializer<StoreState> = {} as StoreState) {
+  constructor(initializer?: Initializer<StoreState>) {
     const initialState =
-      typeof initializer === 'function' ? initializer() : initializer;
+      typeof initializer === 'function'
+        ? initializer()
+        : (initializer ?? ({} as StoreState));
     this.#state = initialState;
     this.#subscribers = [];
     this.#initialState = initialState;
@@ -94,6 +97,28 @@ export function useSlice<
   return slice;
 }
 
+export type UpdaterFn<Slice> = (prev: Slice) => Slice;
+
+export function useSetSlice<
+  StoreState extends State,
+  K extends keyof StoreState,
+>(store: Store<StoreState>, name: K) {
+  const setSlice = useCallback(
+    (updater: StoreState[K] | UpdaterFn<StoreState[K]>) => {
+      store.setState((prev) => ({
+        ...prev,
+        [name]:
+          typeof updater === 'function'
+            ? (updater as UpdaterFn<StoreState[K]>)(prev[name])
+            : updater,
+      }));
+    },
+    [store, name]
+  );
+
+  return setSlice;
+}
+
 export function createStore<StoreState extends State>(
   initializer?: Initializer<StoreState>
 ) {
@@ -110,7 +135,11 @@ export function createStore<StoreState extends State>(
     return useSlice(store, selector as any);
   }
 
-  return {store, useSlice: useSliceProx};
+  function useSetSliceProx<K extends keyof StoreState>(name: K) {
+    return useSetSlice(store, name);
+  }
+
+  return {store, useSlice: useSliceProx, useSetSlice: useSetSliceProx};
 }
 
 export function createStoreContext<StoreState extends State>() {
@@ -147,7 +176,18 @@ export function createStoreContext<StoreState extends State>() {
     return useSlice(store, selector as any);
   }
 
+  function useSetSliceProx<K extends keyof StoreState>(name: K) {
+    const store = useStore();
+    return useSetSlice(store, name);
+  }
+
   const StoreConsumer = StoreContext.Consumer;
 
-  return {StoreProvider, StoreConsumer, useStore, useSlice: useSliceProx};
+  return {
+    StoreProvider,
+    StoreConsumer,
+    useStore,
+    useSlice: useSliceProx,
+    useSetSlice: useSetSliceProx,
+  };
 }
