@@ -10,7 +10,7 @@ type State = {
 const {StoreProvider, useStore, useSlice} = createStoreContext<State>();
 
 function Counter() {
-  const count = useSlice<number>('count');
+  const count = useSlice('count');
   const store = useStore();
   return (
     <div>

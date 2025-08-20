@@ -107,8 +107,8 @@ function ChildObj() {
 }
 
 function Dynamic() {
-  const [name, setName] = useState('str');
-  const slice: string = useSlice(store, name);
+  const [name, setName] = useState<'str' | 'num'>('str');
+  const slice = useSlice(store, name);
 
   console.log('Dynamic');
   return (

@@ -9,7 +9,7 @@ type State = {
 const {store, useSlice} = createStore<State>({count: 10, todos: []});
 
 function Counter() {
-  const count = useSlice<number>('count');
+  const count = useSlice('count');
 
   return (
     <div>

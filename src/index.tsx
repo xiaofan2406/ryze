@@ -11,9 +11,7 @@ import memoizeOne from 'memoize-one';
 
 type State = Record<string, unknown>;
 type Subscriber = () => void;
-type Initializer<T extends State> = T | (() => T);
-type SelectorFn<S, R> = (state: S) => R;
-type Selector<S, R> = string | SelectorFn<S, R>;
+type Initializer<T> = T | (() => T);
 
 export class Store<StoreState extends State> {
   #state: StoreState;
@@ -22,9 +20,7 @@ export class Store<StoreState extends State> {
 
   constructor(initializer: Initializer<StoreState> = {} as StoreState) {
     const initialState =
-      typeof initializer === 'function'
-        ? (initializer as () => StoreState)()
-        : initializer;
+      typeof initializer === 'function' ? initializer() : initializer;
     this.#state = initialState;
     this.#subscribers = [];
     this.#initialState = initialState;
@@ -58,50 +54,63 @@ export class Store<StoreState extends State> {
   };
 }
 
-function defaultSelector<StoreState>(state: StoreState) {
-  return state;
-}
-
-export function useSlice<StoreState extends State, Slice>(
+export function useSlice<StoreState extends State>(
+  store: Store<StoreState>
+): StoreState;
+export function useSlice<
+  StoreState extends State,
+  Key extends keyof StoreState,
+>(store: Store<StoreState>, selector: Key): StoreState[Key];
+export function useSlice<StoreState extends State, Result>(
   store: Store<StoreState>,
-  selector?: Selector<StoreState, Slice>
-) {
+  selector: (state: StoreState) => Result
+): Result;
+export function useSlice<
+  StoreState extends State,
+  Key extends keyof StoreState,
+  Result,
+>(store: Store<StoreState>, selector?: Key | ((state: StoreState) => Result)) {
   const getSnapshot = useMemo(() => {
-    if (typeof selector === 'string') {
-      // There is no need to memoize for string path selector
-      // since we rely on user to update state in a immutable way
-      // the result will only change if the value change
-      return () => store.getState()[selector] as Slice;
+    if (!selector) return () => store.getState();
+
+    if (typeof selector === 'function') {
+      // Memoizing the result against the selector
+      // if a selector is different in every render,
+      // - if it returns a path in state directly, it wont rerender as useSyncExternalStore takes care of that change
+      // - if it returns a derived result from state, it will re render even if the result does not change
+      // Therefore, it is important to declare ensure the selector has the same identity across renders
+      const memoizedSelector = memoizeOne(selector);
+      return () => memoizedSelector(store.getState());
     }
 
-    const _selector = (selector ?? defaultSelector<StoreState>) as SelectorFn<
-      StoreState,
-      Slice
-    >;
-    // Memoizing the result against the selector
-    // if a selector is different in every render,
-    // - if it returns a path in state directly, it wont rerender as useSyncExternalStore takes care of that change
-    // - if it returns a derived result from state, it will re render even if the result does not change
-    // Therefore, it is important to declare ensure the selector has the same identity across renders
-    const memoizedSelector = memoizeOne(_selector);
-    return () => memoizedSelector(store.getState());
-  }, [store, selector]);
+    // There is no need to memoize for string path selector
+    // since we rely on user to update state in a immutable way
+    // the result will only change if the value change
+    return () => store.getState()[selector];
+  }, [store, selector]) as () => Result | StoreState[Key];
 
-  const slice = useSyncExternalStore<Slice>(store.subscribe, getSnapshot);
+  const slice = useSyncExternalStore(store.subscribe, getSnapshot);
 
   return slice;
 }
 
 export function createStore<StoreState extends State>(
-  initializer: Initializer<StoreState>
+  initializer?: Initializer<StoreState>
 ) {
   const store = new Store(initializer);
 
-  function useSlice_<Slice>(selector?: Selector<StoreState, Slice>) {
-    return useSlice(store, selector);
+  // @ts-expect-error This overload signature is not compatible with its implementation signature
+  function useSliceProx(): StoreState;
+  function useSliceProx<K extends keyof StoreState>(selector: K): StoreState[K];
+  function useSliceProx<R>(selector: (state: StoreState) => R): R;
+  function useSliceProx<K extends keyof StoreState, R>(
+    selector?: K | ((state: StoreState) => R)
+  ) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return useSlice(store, selector as any);
   }
 
-  return {store, useSlice: useSlice_};
+  return {store, useSlice: useSliceProx};
 }
 
 export function createStoreContext<StoreState extends State>() {
@@ -126,12 +135,19 @@ export function createStoreContext<StoreState extends State>() {
     return store;
   }
 
-  function useSlice_<Slice>(selector?: Selector<StoreState, Slice>) {
+  // @ts-expect-error This overload signature is not compatible with its implementation signature
+  function useSliceProx(): StoreState;
+  function useSliceProx<K extends keyof StoreState>(selector: K): StoreState[K];
+  function useSliceProx<R>(selector: (state: StoreState) => R): R;
+  function useSliceProx<K extends keyof StoreState, R>(
+    selector?: K | ((state: StoreState) => R)
+  ) {
     const store = useStore();
-    return useSlice(store, selector);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return useSlice(store, selector as any);
   }
 
   const StoreConsumer = StoreContext.Consumer;
 
-  return {StoreProvider, StoreConsumer, useStore, useSlice: useSlice_};
+  return {StoreProvider, StoreConsumer, useStore, useSlice: useSliceProx};
 }
